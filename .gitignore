@@ -2,3 +2,8 @@
 /bin
 /keystore
 /password
+local.properties
+build
+.gradle
+.idea
+

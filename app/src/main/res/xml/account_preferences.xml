@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="General Settings" />
+
+    <PreferenceScreen
+        android:key="account_settings"
+        android:summary="Sync frequency, notifications, etc."
+        android:title="Account Settings" >
+        <intent
+            android:action="org.herrlado.pf.android.activity.Preferences.ACCOUNT_SETUP"
+            android:targetClass="org.herrlado.of.android.activity.Preferences"
+            android:targetPackage="org.herrlado.pf.android" />
+    </PreferenceScreen>
+
+</PreferenceScreen>
