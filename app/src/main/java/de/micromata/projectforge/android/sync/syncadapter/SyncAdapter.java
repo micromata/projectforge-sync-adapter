@@ -15,13 +15,6 @@
  */
 package de.micromata.projectforge.android.sync.syncadapter;
 
-import java.io.IOException;
-import java.util.List;
-
-import org.apache.http.ParseException;
-import org.apache.http.auth.AuthenticationException;
-import org.json.JSONException;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AuthenticatorException;
@@ -33,6 +26,14 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+
+import org.apache.http.ParseException;
+import org.apache.http.auth.AuthenticationException;
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.List;
+
 import de.micromata.projectforge.android.sync.Constants;
 import de.micromata.projectforge.android.sync.client.NetworkUtilities;
 import de.micromata.projectforge.android.sync.client.RawContact;
@@ -45,150 +46,154 @@ import de.micromata.projectforge.android.sync.platform.ContactManager;
  * update the contacts' status messages, which would be useful for a messaging
  * or social networking client.
  */
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
+public class SyncAdapter extends AbstractThreadedSyncAdapter
+{
 
-	private static final String TAG = "ProjectForgeSyncAdapter";
-	private static final String SYNC_MARKER_KEY = "de.micromata.projectforge.android.sync.marker";
-	private static final boolean NOTIFY_AUTH_FAILURE = true;
+  private static final String TAG = "ProjectForgeSyncAdapter";
 
-	private final AccountManager mAccountManager;
+  private static final String SYNC_MARKER_KEY = "de.micromata.projectforge.android.sync.marker";
 
-	private final Context mContext;
+  private static final boolean NOTIFY_AUTH_FAILURE = true;
 
-	public SyncAdapter(Context context, boolean autoInitialize) {
-		super(context, autoInitialize);
-		mContext = context;
-		mAccountManager = AccountManager.get(context);
-	}
+  private final AccountManager mAccountManager;
 
-	@Override
-	public void onPerformSync(Account account, Bundle extras, String authority,
-			ContentProviderClient provider, SyncResult syncResult) {
+  private final Context mContext;
 
-		try {
-			// see if we already have a sync-state attached to this account. By
-			// handing
-			// This value to the server, we can just get the contacts that have
-			// been updated on the server-side since our last sync-up
-			long lastSyncMarker = getServerSyncMarker(account);
+  public SyncAdapter(Context context, boolean autoInitialize)
+  {
+    super(context, autoInitialize);
+    mContext = context;
+    mAccountManager = AccountManager.get(context);
+  }
 
-			// By default, contacts from a 3rd party provider are hidden in the
-			// contacts
-			// list. So let's set the flag that causes them to be visible, so
-			// that users
-			// can actually see these contacts.
-			if (lastSyncMarker == 0) {
-				ContactManager.setAccountContactsVisibility(getContext(),
-						account, true);
-			}
+  @Override
+  public void onPerformSync(Account account, Bundle extras, String authority,
+      ContentProviderClient provider, SyncResult syncResult)
+  {
 
+    try {
+      // see if we already have a sync-state attached to this account. By
+      // handing
+      // This value to the server, we can just get the contacts that have
+      // been updated on the server-side since our last sync-up
+      long lastSyncMarker = getServerSyncMarker(account);
 
-			List<RawContact> updatedContacts;
-
-			// Use the account manager to request the AuthToken we'll need
-			// to talk to our sample server. If we don't have an AuthToken
-			// yet, this could involve a round-trip to the server to request
-			// and AuthToken.
-			final String authtoken = mAccountManager.blockingGetAuthToken(
-					account, Constants.AUTHTOKEN_TYPE, NOTIFY_AUTH_FAILURE);
+      // By default, contacts from a 3rd party provider are hidden in the
+      // contacts
+      // list. So let's set the flag that causes them to be visible, so
+      // that users
+      // can actually see these contacts.
+      if (lastSyncMarker == 0) {
+        ContactManager.setAccountContactsVisibility(getContext(),
+            account, true);
+      }
 
 
-			if(authtoken == null){
-				throw new AuthenticationException("authtoken==null");
-			}
+      List<RawContact> updatedContacts;
+
+      // Use the account manager to request the AuthToken we'll need
+      // to talk to our sample server. If we don't have an AuthToken
+      // yet, this could involve a round-trip to the server to request
+      // and AuthToken.
+      final String authtoken = mAccountManager.blockingGetAuthToken(
+          account, Constants.AUTHTOKEN_TYPE, NOTIFY_AUTH_FAILURE);
 
 
-			// Make sure that the sample group exists
-			final long groupId = ContactManager.ensureProjectForgeGroupExists(
-					mContext, account);
+      if (authtoken == null) {
+        throw new AuthenticationException("authtoken==null");
+      }
 
-			// Find the local 'dirty' contacts that we need to tell the server
-			// about...
-			// Find the local users that need to be sync'd to the server...
-			//Map<Long, RawContact> dirtyContacts = ContactManager.getDirtyContacts(mContext, account);
 
-			// Send the dirty contacts to the server, and retrieve the
-			// server-side changes
-			try {
-				updatedContacts = NetworkUtilities.syncContacts(mContext,
-						account, authtoken, lastSyncMarker);
-			} catch (AuthenticationException e) {
-				AccountManager.get(mContext).invalidateAuthToken(account.type,
-						authtoken);
-				throw e;
-			}
+      // Make sure that the sample group exists
+      final long groupId = ContactManager.ensureProjectForgeGroupExists(
+          mContext, account);
 
-			// Update the local contacts database with the changes.
-			// updateContacts()
-			// returns a syncState value that indicates the high-water-mark for
-			// the changes we received.
-			Log.d(TAG, "Calling contactManager's sync contacts");
-			long newSyncState = ContactManager.updateContacts(mContext,
-					account.name, updatedContacts, groupId, lastSyncMarker);
+      // Find the local 'dirty' contacts that we need to tell the server
+      // about...
+      // Find the local users that need to be sync'd to the server...
+      //Map<Long, RawContact> dirtyContacts = ContactManager.getDirtyContacts(mContext, account);
 
-			// This is a demo of how you can update IM-style status messages
-			// for contacts on the client. This probably won't apply to
-			// 2-way contact sync providers - it's more likely that one-way
-			// sync providers (IM clients, social networking apps, etc) would
-			// use this feature.
-			//ContactManager.updateStatusMessages(mContext, updatedContacts);
+      // Send the dirty contacts to the server, and retrieve the
+      // server-side changes
+      try {
+        updatedContacts = NetworkUtilities.syncContacts(mContext,
+            account, authtoken, lastSyncMarker);
+      } catch (AuthenticationException e) {
+        AccountManager.get(mContext).invalidateAuthToken(account.type,
+            authtoken);
+        throw e;
+      }
 
-			// Save off the new sync marker. On our next sync, we only want to
-			// receive
-			// contacts that have changed since this sync...
-			setServerSyncMarker(account, newSyncState);
+      // Update the local contacts database with the changes.
+      // updateContacts()
+      // returns a syncState value that indicates the high-water-mark for
+      // the changes we received.
+      Log.d(TAG, "Calling contactManager's sync contacts");
+      long newSyncState = ContactManager.updateContacts(mContext,
+          account.name, updatedContacts, groupId, lastSyncMarker);
 
-			//if (dirtyContacts.size() > 0) {
-			//	ContactManager.clearSyncFlags(mContext, dirtyContacts);
-			//}
+      // This is a demo of how you can update IM-style status messages
+      // for contacts on the client. This probably won't apply to
+      // 2-way contact sync providers - it's more likely that one-way
+      // sync providers (IM clients, social networking apps, etc) would
+      // use this feature.
+      //ContactManager.updateStatusMessages(mContext, updatedContacts);
 
-		} catch (final AuthenticatorException e) {
-			Log.e(TAG, "AuthenticatorException", e);
-			syncResult.stats.numParseExceptions++;
-		} catch (final OperationCanceledException e) {
-			Log.e(TAG, "OperationCanceledExcetpion", e);
-		} catch (final IOException e) {
-			Log.e(TAG, "IOException", e);
-			syncResult.stats.numIoExceptions++;
-		} catch (final AuthenticationException e) {
-			Log.e(TAG, "AuthenticationException", e);
-			syncResult.stats.numAuthExceptions++;
-			} catch (final ParseException e) {
-			Log.e(TAG, "ParseException", e);
-			syncResult.stats.numParseExceptions++;
-		} catch (final JSONException e) {
-			Log.e(TAG, "JSONException", e);
-			syncResult.stats.numParseExceptions++;
-		}
-	}
+      // Save off the new sync marker. On our next sync, we only want to
+      // receive
+      // contacts that have changed since this sync...
+      setServerSyncMarker(account, newSyncState);
 
-	/**
-	 * This helper function fetches the last known high-water-mark we received
-	 * from the server - or 0 if we've never synced.
-	 *
-	 * @param account
-	 *            the account we're syncing
-	 * @return the change high-water-mark
-	 */
-	private long getServerSyncMarker(Account account) {
-		String markerString = mAccountManager.getUserData(account,
-				SYNC_MARKER_KEY);
-		if (!TextUtils.isEmpty(markerString)) {
-			return Long.parseLong(markerString);
-		}
-		return 0;
-	}
+      //if (dirtyContacts.size() > 0) {
+      //	ContactManager.clearSyncFlags(mContext, dirtyContacts);
+      //}
 
-	/**
-	 * Save off the high-water-mark we receive back from the server.
-	 *
-	 * @param account
-	 *            The account we're syncing
-	 * @param marker
-	 *            The high-water-mark we want to save.
-	 */
-	private void setServerSyncMarker(Account account, long marker) {
-		mAccountManager.setUserData(account, SYNC_MARKER_KEY,
-				Long.toString(marker));
-	}
+    } catch (final AuthenticatorException e) {
+      Log.e(TAG, "AuthenticatorException", e);
+      syncResult.stats.numParseExceptions++;
+    } catch (final OperationCanceledException e) {
+      Log.e(TAG, "OperationCanceledExcetpion", e);
+    } catch (final IOException e) {
+      Log.e(TAG, "IOException", e);
+      syncResult.stats.numIoExceptions++;
+    } catch (final AuthenticationException e) {
+      Log.e(TAG, "AuthenticationException", e);
+      syncResult.stats.numAuthExceptions++;
+    } catch (final ParseException e) {
+      Log.e(TAG, "ParseException", e);
+      syncResult.stats.numParseExceptions++;
+    } catch (final JSONException e) {
+      Log.e(TAG, "JSONException", e);
+      syncResult.stats.numParseExceptions++;
+    }
+  }
+
+  /**
+   * This helper function fetches the last known high-water-mark we received
+   * from the server - or 0 if we've never synced.
+   *
+   * @param account the account we're syncing
+   * @return the change high-water-mark
+   */
+  private long getServerSyncMarker(Account account)
+  {
+    String markerString = mAccountManager.getUserData(account,
+        SYNC_MARKER_KEY);
+    if (!TextUtils.isEmpty(markerString)) {
+      return Long.parseLong(markerString);
+    }
+    return 0;
+  }
+
+  /**
+   * Save off the high-water-mark we receive back from the server.
+   *
+   * @param account The account we're syncing
+   * @param marker The high-water-mark we want to save.
+   */
+  private void setServerSyncMarker(Account account, long marker)
+  {
+    mAccountManager.setUserData(account, SYNC_MARKER_KEY,
+        Long.toString(marker));
+  }
 }

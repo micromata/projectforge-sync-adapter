@@ -25,17 +25,17 @@ import android.provider.ContactsContract.CommonDataKinds.GroupMembership;
 import android.provider.ContactsContract.CommonDataKinds.Note;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 import android.text.TextUtils;
+
 import de.micromata.projectforge.android.sync.Constants;
 import de.micromata.projectforge.android.sync.R;
-import de.micromata.projectforge.android.sync.client.NetworkUtilities;
 import de.micromata.projectforge.android.sync.client.RawAddress;
-import android.provider.ContactsContract.CommonDataKinds.Photo;
 
 
 /**
@@ -74,10 +74,11 @@ public class ContactOperations
    * Returns an instance of ContactOperations instance for adding new contact
    * to the platform contacts provider.
    *
-   * @param context the Authenticator Activity context
-   * @param userId the userId of the sample SyncAdapter user object
-   * @param accountName the username for the SyncAdapter account
+   * @param context         the Authenticator Activity context
+   * @param userId          the userId of the sample SyncAdapter user object
+   * @param accountName     the username for the SyncAdapter account
    * @param isSyncOperation are we executing this as part of a sync operation?
+   * @param batchOperation  the batch operation
    * @return instance of ContactOperations
    */
   public static ContactOperations createNewContact(Context context,
@@ -92,9 +93,10 @@ public class ContactOperations
    * Returns an instance of ContactOperations for updating existing contact in
    * the platform contacts provider.
    *
-   * @param context the Authenticator Activity context
-   * @param rawContactId the unique Id of the existing rawContact
+   * @param context         the Authenticator Activity context
+   * @param rawContactId    the unique Id of the existing rawContact
    * @param isSyncOperation are we executing this as part of a sync operation?
+   * @param batchOperation  the batch operation
    * @return instance of ContactOperations
    */
   public static ContactOperations updateExistingContact(Context context,
@@ -105,6 +107,13 @@ public class ContactOperations
         batchOperation);
   }
 
+  /**
+   * Instantiates a new Contact operations.
+   *
+   * @param context         the context
+   * @param isSyncOperation the is sync operation
+   * @param batchOperation  the batch operation
+   */
   public ContactOperations(Context context, boolean isSyncOperation,
       BatchOperation batchOperation)
   {
@@ -115,6 +124,15 @@ public class ContactOperations
     mBatchOperation = batchOperation;
   }
 
+  /**
+   * Instantiates a new Contact operations.
+   *
+   * @param context         the context
+   * @param userId          the user id
+   * @param accountName     the account name
+   * @param isSyncOperation the is sync operation
+   * @param batchOperation  the batch operation
+   */
   public ContactOperations(Context context, long userId, String accountName,
       boolean isSyncOperation, BatchOperation batchOperation)
   {
@@ -130,6 +148,14 @@ public class ContactOperations
     mBatchOperation.add(builder.build());
   }
 
+  /**
+   * Instantiates a new Contact operations.
+   *
+   * @param context         the context
+   * @param rawContactId    the raw contact id
+   * @param isSyncOperation the is sync operation
+   * @param batchOperation  the batch operation
+   */
   public ContactOperations(Context context, long rawContactId,
       boolean isSyncOperation, BatchOperation batchOperation)
   {
@@ -142,12 +168,8 @@ public class ContactOperations
    * Adds a contact name. We can take either a full name ("Bob Smith") or
    * separated first-name and last-name ("Bob" and "Smith").
    *
-   * @param fullName The full name of the contact - typically from an edit form Can
-   * be null if firstName/lastName are specified.
-   * @param firstName The first name of the contact - can be null if fullName is
-   * specified.
-   * @param lastName The last name of the contact - can be null if fullName is
-   * specified.
+   * @param firstName The first name of the contact - can be null if fullName is specified.
+   * @param lastName  The last name of the contact - can be null if fullName is specified.
    * @return instance of ContactOperations
    */
   public ContactOperations addName(String firstName, String lastName)
@@ -179,7 +201,8 @@ public class ContactOperations
   /**
    * Adds an email
    *
-   * @param the email address we're adding
+   * @param email     the email
+   * @param emailType the email type
    * @return instance of ContactOperations
    */
   public ContactOperations addEmail(String email, int emailType)
@@ -197,7 +220,8 @@ public class ContactOperations
   /**
    * Adds an email
    *
-   * @param the email address we're adding
+   * @param fax     the fax
+   * @param faxType the fax type
    * @return instance of ContactOperations
    */
   public ContactOperations addFax(String fax, int faxType)
@@ -215,7 +239,7 @@ public class ContactOperations
   /**
    * Adds a website
    *
-   * @param the website address we're adding
+   * @param website the website
    * @return instance of ContactOperations
    */
   public ContactOperations addWebsite(String website)
@@ -232,7 +256,7 @@ public class ContactOperations
   /**
    * Adds a website
    *
-   * @param the note address we're adding
+   * @param note the note
    * @return instance of ContactOperations
    */
   public ContactOperations addNote(String note)
@@ -246,11 +270,26 @@ public class ContactOperations
     return this;
   }
 
+  /**
+   * Add addr contact operations.
+   *
+   * @param addr     the addr
+   * @param addrType the addr type
+   * @return the contact operations
+   */
   public ContactOperations addAddr(RawAddress addr, int addrType)
   {
     return addAddr(addr, addrType, null);
   }
 
+  /**
+   * Add addr contact operations.
+   *
+   * @param addr     the addr
+   * @param addrType the addr type
+   * @param label    the label
+   * @return the contact operations
+   */
   public ContactOperations addAddr(RawAddress addr, int addrType, String label)
   {
     mValues.clear();
@@ -274,7 +313,7 @@ public class ContactOperations
   /**
    * Adds a phone number
    *
-   * @param phone new phone number for the contact
+   * @param phone     new phone number for the contact
    * @param phoneType the type: cell, home, etc.
    * @return instance of ContactOperations
    */
@@ -290,6 +329,14 @@ public class ContactOperations
     return this;
   }
 
+  /**
+   * Add organization contact operations.
+   *
+   * @param organization the organization
+   * @param division     the division
+   * @param position     the position
+   * @return the contact operations
+   */
   public ContactOperations addOrganization(String organization,
       String division, String position)
   {
@@ -309,7 +356,7 @@ public class ContactOperations
   /**
    * Adds a group membership
    *
-   * @param id The id of the group to assign
+   * @param groupId the group id
    * @return instance of ContactOperations
    */
   public ContactOperations addGroupMembership(long groupId)
@@ -321,6 +368,12 @@ public class ContactOperations
     return this;
   }
 
+  /**
+   * Add avatar contact operations.
+   *
+   * @param data the data
+   * @return the contact operations
+   */
   public ContactOperations addAvatar(byte[] data)
   {
     if (data != null) {
@@ -359,7 +412,7 @@ public class ContactOperations
    * Updates contact's serverId
    *
    * @param serverId the serverId for this contact
-   * @param uri Uri for the existing raw contact to be updated
+   * @param uri      Uri for the existing raw contact to be updated
    * @return instance of ContactOperations
    */
   public ContactOperations updateServerId(long serverId, Uri uri)
@@ -373,8 +426,9 @@ public class ContactOperations
   /**
    * Updates contact's email
    *
-   * @param email email id of the sample SyncAdapter user
-   * @param uri Uri for the existing raw contact to be updated
+   * @param email         email id of the sample SyncAdapter user
+   * @param existingEmail the existing email
+   * @param uri           Uri for the existing raw contact to be updated
    * @return instance of ContactOperations
    */
   public ContactOperations updateEmail(String email, String existingEmail,
@@ -388,6 +442,14 @@ public class ContactOperations
     return this;
   }
 
+  /**
+   * Update addr contact operations.
+   *
+   * @param addr         the addr
+   * @param existingAddr the existing addr
+   * @param uri          the uri
+   * @return the contact operations
+   */
   public ContactOperations updateAddr(RawAddress addr,
       RawAddress existingAddr, Uri uri)
   {
@@ -423,8 +485,13 @@ public class ContactOperations
   /**
    * Updates contact's email
    *
-   * @param email email id of the sample SyncAdapter user
-   * @param uri Uri for the existing raw contact to be updated
+   * @param organization         the organization
+   * @param division             the division
+   * @param position             the position
+   * @param existingOrganization the existing organization
+   * @param existingDivision     the existing division
+   * @param existingPosition     the existing position
+   * @param uri                  Uri for the existing raw contact to be updated
    * @return instance of ContactOperations
    */
   public ContactOperations updateOrganization(String organization,
@@ -455,11 +522,11 @@ public class ContactOperations
    * Updates contact's name. The caller can either provide first-name and
    * last-name fields or a full-name field.
    *
-   * @param uri Uri for the existing raw contact to be updated
+   * @param uri               Uri for the existing raw contact to be updated
    * @param existingFirstName the first name stored in provider
-   * @param existingLastName the last name stored in provider
-   * @param firstName the new first name to store
-   * @param lastName the new last name to store //TODO add prefix
+   * @param existingLastName  the last name stored in provider
+   * @param firstName         the new first name to store
+   * @param lastName          the new last name to store //TODO add prefix
    * @return instance of ContactOperations
    */
   public ContactOperations updateName(Uri uri, String existingFirstName,
@@ -482,6 +549,13 @@ public class ContactOperations
     return this;
   }
 
+  /**
+   * Update dirty flag contact operations.
+   *
+   * @param isDirty the is dirty
+   * @param uri     the uri
+   * @return the contact operations
+   */
   public ContactOperations updateDirtyFlag(boolean isDirty, Uri uri)
   {
     int isDirtyValue = isDirty ? 1 : 0;
@@ -494,9 +568,9 @@ public class ContactOperations
   /**
    * Updates contact's phone
    *
+   * @param phone          new phone number for the contact
    * @param existingNumber phone number stored in contacts provider
-   * @param phone new phone number for the contact
-   * @param uri Uri for the existing raw contact to be updated
+   * @param uri            Uri for the existing raw contact to be updated
    * @return instance of ContactOperations
    */
   public ContactOperations updatePhone(String phone, String existingNumber,
@@ -510,6 +584,13 @@ public class ContactOperations
     return this;
   }
 
+  /**
+   * Update avatar contact operations.
+   *
+   * @param avatar the avatar
+   * @param uri    the uri
+   * @return the contact operations
+   */
   public ContactOperations updateAvatar(byte[] avatar, Uri uri)
   {
     if (avatar != null) {
@@ -521,6 +602,13 @@ public class ContactOperations
     return this;
   }
 
+  /**
+   * Update note.
+   *
+   * @param note         the note
+   * @param existingNote the existing note
+   * @param uri          the uri
+   */
   public void updateNote(String note, String existingNote, Uri uri)
   {
 
@@ -532,6 +620,14 @@ public class ContactOperations
     }
   }
 
+  /**
+   * Update webiste contact operations.
+   *
+   * @param website        the website
+   * @param existingWesite the existing wesite
+   * @param uri            the uri
+   * @return the contact operations
+   */
   public ContactOperations updateWebiste(String website,
       String existingWesite, Uri uri)
   {
@@ -548,7 +644,7 @@ public class ContactOperations
    * Updates contact's profile action
    *
    * @param userId sample SyncAdapter user id
-   * @param uri Uri for the existing raw contact to be updated
+   * @param uri    Uri for the existing raw contact to be updated
    * @return instance of ContactOperations
    */
   public ContactOperations updateProfileAction(Integer userId, Uri uri)
@@ -597,6 +693,14 @@ public class ContactOperations
     mBatchOperation.add(builder.build());
   }
 
+  /**
+   * New insert cpo content provider operation . builder.
+   *
+   * @param uri             the uri
+   * @param isSyncOperation the is sync operation
+   * @param isYieldAllowed  the is yield allowed
+   * @return the content provider operation . builder
+   */
   public static ContentProviderOperation.Builder newInsertCpo(Uri uri,
       boolean isSyncOperation, boolean isYieldAllowed)
   {
@@ -605,6 +709,14 @@ public class ContactOperations
         .withYieldAllowed(isYieldAllowed);
   }
 
+  /**
+   * New update cpo content provider operation . builder.
+   *
+   * @param uri             the uri
+   * @param isSyncOperation the is sync operation
+   * @param isYieldAllowed  the is yield allowed
+   * @return the content provider operation . builder
+   */
   public static ContentProviderOperation.Builder newUpdateCpo(Uri uri,
       boolean isSyncOperation, boolean isYieldAllowed)
   {
@@ -613,6 +725,14 @@ public class ContactOperations
         .withYieldAllowed(isYieldAllowed);
   }
 
+  /**
+   * New delete cpo content provider operation . builder.
+   *
+   * @param uri             the uri
+   * @param isSyncOperation the is sync operation
+   * @param isYieldAllowed  the is yield allowed
+   * @return the content provider operation . builder
+   */
   public static ContentProviderOperation.Builder newDeleteCpo(Uri uri,
       boolean isSyncOperation, boolean isYieldAllowed)
   {
