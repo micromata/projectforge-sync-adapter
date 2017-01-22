@@ -18,8 +18,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="de.micromata.projectforge.android.sync"
-          android:versionCode="21"
-          android:versionName="2.1">
+          android:versionCode="22"
+          android:versionName="2.2">
 
   <uses-permission android:name="android.permission.GET_ACCOUNTS" />
   <uses-permission android:name="android.permission.USE_CREDENTIALS" />

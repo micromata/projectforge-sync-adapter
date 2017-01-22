@@ -3,16 +3,12 @@ package de.micromata.projectforge.android.sync.client;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
-import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import org.apache.http.ParseException;
 import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 
@@ -170,20 +166,12 @@ public class Parser
       } else if (fieldname.equals("id")) {
         c.setServerContactId(getLong());
       } else if (fieldname.equals("image")) {
-        current = jParser.nextToken();
-        ArrayList<Integer> bytes = new ArrayList<Integer>();
-        while ((current = jParser.nextToken()) != JsonToken.END_ARRAY) {
-          bytes.add(jParser.getIntValue());
+        String base64Image = getString();
+        try {
+          c.setAvatar(Base64.decode(base64Image, Base64.DEFAULT));
+        }catch (Exception ex){
+          Log.e(Parser.class.getSimpleName(), ex.getMessage());
         }
-        byte[] data = new byte[bytes.size()];
-        for (int i = 0; i < bytes.size(); i++) {
-          final int integer = bytes.get(i);
-          data[i] = (byte) integer;
-        }
-        bytes.clear();
-        c.setAvatar(data);
-        //Log.i(Parser.class.getSimpleName(), "skipping image:");
-        ////jParser.skipChildren();
       } else if (fieldname.equals("communicationLanguage")) {
         c.setCommunicationLanguage(getString());
       } else if (fieldname.equals("publicKey")) {
