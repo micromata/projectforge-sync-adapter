@@ -16,6 +16,16 @@
 
 package de.micromata.projectforge.android.sync.client;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.Pair;
+import de.micromata.projectforge.android.sync.authenticator.AuthenticationException;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,48 +37,37 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.ParseException;
-import org.apache.http.auth.AuthenticationException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.text.TextUtils;
-import android.util.Log;
-import android.util.Pair;
 
 /**
  * Provides utility methods for communicating with the server.
  */
 final public class NetworkUtilities
 {
-  /** The tag used to log to adb console. */
+  /**
+   * The tag used to log to adb console.
+   */
   private static final String TAG = "NetworkUtilities";
 
-  /** POST parameter name for the user's account name */
+  /**
+   * POST parameter name for the user's account name
+   */
   public static final String PARAM_USERNAME = "authenticationUsername";
 
-  /** POST parameter name for the user's password */
+  /**
+   * POST parameter name for the user's password
+   */
   public static final String PARAM_PASSWORD = "authenticationPassword";
 
-  /** POST parameter name for the user's authentication token */
+  /**
+   * POST parameter name for the user's authentication token
+   */
   public static final String PARAM_AUTH_TOKEN = "authenticationToken";
 
-  /** parameter name for the user's id */
+  /**
+   * parameter name for the user's id
+   */
   public static final String PARAM_USER_ID = "authenticationUserId";
 
   /**
@@ -76,25 +75,35 @@ final public class NetworkUtilities
    */
   public static final String PARAM_MODIFIED_SINCE = "modifiedSince";
 
-  /** POST parameter name for the client's last-known sync state */
+  /**
+   * POST parameter name for the client's last-known sync state
+   */
   public static final String PARAM_SYNC_STATE = "syncstate";
 
-  /** POST parameter name for the sending client-edited contact info */
+  /**
+   * POST parameter name for the sending client-edited contact info
+   */
   public static final String PARAM_CONTACTS_DATA = "contacts";
 
-  /** Timeout (in ms) we specify for each http request */
-  public static final int HTTP_REQUEST_TIMEOUT_MS = 30 * 1000;
+  /**
+   * Timeout (in ms) we specify for each http request
+   */
+  public static final int HTTP_REQUEST_TIMEOUT_MS = 3 * 1000;
   /** Base URL for the v2 Sample Sync Service */
   // public static final String BASE_URL =
   // "https://projectforge.micromata.de/rest";
 
-  /** URI for authentication service */
+  /**
+   * URI for authentication service
+   */
   public static final String AUTH_URI_PATH = "/rest/authenticate/getToken";
   /** URI for initializing authentication service */
   // public static final String INIT_URI_PATH =
   // "/rest/authenticate/initialContact";
 
-  /** URI for sync service */
+  /**
+   * URI for sync service
+   */
   public static final String SYNC_CONTACTS_URI = "/rest/address/list";
 
   private NetworkUtilities()
@@ -106,32 +115,31 @@ final public class NetworkUtilities
    *
    * @return the http client
    */
-  public static HttpClient getHttpClient()
-  {
-    HttpClient httpClient = new DefaultHttpClient();
-    final HttpParams params = httpClient.getParams();
-    HttpConnectionParams.setConnectionTimeout(params,
-        HTTP_REQUEST_TIMEOUT_MS);
-    HttpConnectionParams.setSoTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
-    ConnManagerParams.setTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
-    return httpClient;
-  }
+  //  public static HttpClient getHttpClient()
+  //  {
+  //    Http
+  //    HttpClient httpClient = new DefaultHttpClient();
+  //    final HttpParams params = httpClient.getParams();
+  //    HttpConnectionParams.setConnectionTimeout(params,
+  //        HTTP_REQUEST_TIMEOUT_MS);
+  //    HttpConnectionParams.setSoTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
+  //    ConnManagerParams.setTimeout(params, HTTP_REQUEST_TIMEOUT_MS);
+  //    return httpClient;
+  //  }
 
   /**
-   * Connects to the SampleSync test server, authenticates the provided
-   * username and password.
+   * Connects to the SampleSync test server, authenticates the provided username and password.
    *
-   * @param baseUrl the base url
+   * @param baseUrl  the base url
    * @param username The server account username
    * @param password The server account password
    * @return Pair<String String> The <userId, authentication token> returned by the server (or null)
    * @throws UnsupportedEncodingException the unsupported encoding exception
    */
   public static Pair<String, String> authenticate(String baseUrl,
-      String username, String password) throws UnsupportedEncodingException
+      String username, String password) throws IOException
   {
 
-    final HttpResponse resp;
 
     StringBuilder urlBuilder = new StringBuilder();
 
@@ -142,7 +150,10 @@ final public class NetworkUtilities
     urlBuilder.append("?").append(PARAM_USERNAME).append("=").append(URLEncoder.encode(username)).append("&").append
         (PARAM_PASSWORD).append("=").append(URLEncoder.encode(password));
 
-    final HttpGet authRequest = new HttpGet(urlBuilder.toString());
+    //final HttpGet authRequest = new HttpGet(urlBuilder.toString());
+    HttpURLConnection urlConnection =
+        (HttpURLConnection) new URL(urlBuilder.toString()).openConnection();
+    urlConnection.setConnectTimeout(HTTP_REQUEST_TIMEOUT_MS);
     //final HttpPost post = new HttpPost(urlBuilder.toString());
     //ArrayList<NameValuePair> creds = new ArrayList<NameValuePair>(2);
     //creds.add(new BasicNameValuePair(PARAM_USERNAME, username));
@@ -150,29 +161,28 @@ final public class NetworkUtilities
     //post.setEntity(new UrlEncodedFormEntity(creds));
 
     try {
-      resp = getHttpClient().execute(authRequest);
+      urlConnection.connect();
+
       Pair<String, String> auth = null;
-      if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-        InputStream istream = (resp.getEntity() != null) ? resp
-            .getEntity().getContent() : null;
-        if (istream != null) {
-          JSONObject obj = new JSONObject(slurp(istream));
-          Boolean delted = obj.getBoolean("deleted");
+      if (urlConnection.getResponseCode() == 200) {
 
-          if (delted == true) {
-            throw new IllegalStateException("User deleted!");
-          } else {
-            auth = Pair.create(obj.getString("id"),
-                obj.getString("authenticationToken"));
-          }
+        JSONObject obj = new JSONObject(slurp(urlConnection.getInputStream()));
+        urlConnection.disconnect();
 
+        Boolean deleted = obj.getBoolean("deleted");
+
+        if (deleted == true) {
+          throw new IllegalStateException("User deleted!");
+        } else {
+          auth = Pair.create(obj.getString("id"),
+              obj.getString("authenticationToken"));
         }
       }
       if ((auth != null)) {
         Log.v(TAG, "Successful authentication");
         return auth;
       } else {
-        Log.e(TAG, "Error authenticating" + resp.getStatusLine());
+        Log.e(TAG, "Error authenticating" + urlConnection.getResponseMessage());
         return null;
       }
     } catch (final IOException e) {
@@ -204,19 +214,19 @@ final public class NetworkUtilities
   }
 
   /**
-   * Perform 2-way sync with the server-side contacts. We send a request that
-   * includes all the locally-dirty contacts so that the server can process
-   * those changes, and we receive (and return) a list of contacts that were
-   * updated on the server-side that need to be updated locally.
+   * Perform 2-way sync with the server-side contacts. We send a request that includes all the
+   * locally-dirty contacts so that the server can process those changes, and we receive (and
+   * return) a list of contacts that were updated on the server-side that need to be updated
+   * locally.
    *
-   * @param context the context
-   * @param account The account being synced
-   * @param authtoken The authtoken stored in the AccountManager for this account
+   * @param context         the context
+   * @param account         The account being synced
+   * @param authtoken       The authtoken stored in the AccountManager for this account
    * @param serverSyncState A token returned from the server on the last sync
    * @return A list of contacts that we need to update locally
-   * @throws JSONException the json exception
-   * @throws ParseException the parse exception
-   * @throws IOException the io exception
+   * @throws JSONException           the json exception
+   * @throws ParseException          the parse exception
+   * @throws IOException             the io exception
    * @throws AuthenticationException the authentication exception
    */
   public static List<RawContact> syncContacts(Context context,
@@ -265,43 +275,39 @@ final public class NetworkUtilities
           .append(serverSyncState + 1);
     }
 
-    final HttpGet get = new HttpGet(urlBuilder.toString());
+    //    final HttpGet get = new HttpGet(urlBuilder.toString());
+    //
+    //    // Send the updated friends data to the server
+    //
+    //    final HttpResponse resp = getHttpClient().execute(get);
 
-    // Send the updated friends data to the server
-
-    final HttpResponse resp = getHttpClient().execute(get);
-
+    HttpURLConnection httpURLConnection =
+        (HttpURLConnection) new URL(urlBuilder.toString()).openConnection();
+    httpURLConnection.connect();
 
     //    final String response = EntityUtils.toString(resp.getEntity(), "utf-8");
-    if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+    if (httpURLConnection.getResponseCode() == 200) {
       // Our request to the server was successful - so we assume
       // that they accepted all the changes we sent up, and
       // that the response includes the contacts that we need
       // to update on our side...
-      InputStream is = resp.getEntity().getContent();
+      InputStream is = httpURLConnection.getInputStream();
 
       parse(serverDirtyList, is, context);
 
-      System.err.println("Done with parsing###########################3");
+      httpURLConnection.disconnect();
 
-      //final JSONArray serverContacts = new JSONArray(response);
-      // Log.d(TAG, response);
-      //      for (int i = 0; i < serverContacts.length(); i++) {
-      //    //  RawContact rawContact = RawContact.valueOf(serverContacts
-      //        .getJSONObject(i));
-      //  if (rawContact != null) {
-      //  serverDirtyList.add(rawContact);
-      //}
-      //}
     } else {
-      if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED
-          || resp.getStatusLine().getStatusCode() == HttpStatus.SC_FORBIDDEN) {
-        Log.e(TAG, "Authentication exception in sending dirty contacts");
-        throw new AuthenticationException();
+      int rCode = httpURLConnection.getResponseCode();
+      if (rCode == 401
+          || rCode == 403) {
+        String message = "Authentication exception in sending dirty contacts";
+        Log.e(TAG, message);
+        throw new AuthenticationException(message);
       } else {
         Log.e(TAG,
             "Server error in sending dirty contacts: "
-                + resp.getStatusLine());
+                + httpURLConnection.getResponseCode());
         throw new IOException();
       }
     }
@@ -309,7 +315,8 @@ final public class NetworkUtilities
     return serverDirtyList;
   }
 
-  private static void parse(final ArrayList<RawContact> serverDirtyList, final InputStream is, Context context)
+  private static void parse(final ArrayList<RawContact> serverDirtyList, final InputStream is,
+      Context context)
   {
     new Parser().parse(serverDirtyList, is, context);
   }

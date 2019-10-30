@@ -27,15 +27,15 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
-import org.apache.http.ParseException;
-import org.apache.http.auth.AuthenticationException;
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.List;
 
 import de.micromata.projectforge.android.sync.Constants;
+import de.micromata.projectforge.android.sync.authenticator.AuthenticationException;
 import de.micromata.projectforge.android.sync.client.NetworkUtilities;
+import de.micromata.projectforge.android.sync.client.ParseException;
 import de.micromata.projectforge.android.sync.client.RawContact;
 import de.micromata.projectforge.android.sync.platform.ContactManager;
 

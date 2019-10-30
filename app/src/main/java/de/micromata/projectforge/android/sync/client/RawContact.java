@@ -912,4 +912,10 @@ final public class RawContact
   {
     this.lastUpdate = lastUpdate;
   }
+
+  @Override
+  public String toString()
+  {
+    return firstName + " " + lastName;
+  }
 }

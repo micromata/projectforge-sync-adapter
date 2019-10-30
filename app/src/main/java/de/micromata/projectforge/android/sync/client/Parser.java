@@ -7,7 +7,6 @@ import android.util.Base64;
 import android.util.Log;
 import java.io.InputStream;
 import java.util.ArrayList;
-import org.apache.http.ParseException;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
@@ -170,7 +169,7 @@ public class Parser
         try {
           c.setAvatar(Base64.decode(base64Image, Base64.DEFAULT));
         }catch (Exception ex){
-          Log.e(Parser.class.getSimpleName(), ex.getMessage());
+          Log.e(Parser.class.getSimpleName(),  ex.getMessage(), ex);
         }
       } else if (fieldname.equals("communicationLanguage")) {
         c.setCommunicationLanguage(getString());
@@ -218,7 +217,7 @@ public class Parser
     try {
       parseImpl(serverDirtyList, is, context);
     } catch (Exception e) {
-      Log.e(Parser.class.getSimpleName(), "Crash", e);
+      Log.e(Parser.class.getSimpleName(), "Crash",  e);
       throw new ParseException(e.getMessage());
     }
 

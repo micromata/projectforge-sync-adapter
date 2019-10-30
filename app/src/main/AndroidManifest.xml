@@ -18,24 +18,23 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="de.micromata.projectforge.android.sync"
-          android:versionCode="22"
-          android:versionName="2.2">
+          android:versionCode="30"
+          android:versionName="3.0">
 
   <uses-permission android:name="android.permission.GET_ACCOUNTS" />
   <uses-permission android:name="android.permission.USE_CREDENTIALS" />
   <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
   <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
   <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+<!--  <uses-permission android:name="android.permission.WRITE_SETTINGS" />-->
   <uses-permission android:name="android.permission.READ_CONTACTS" />
   <uses-permission android:name="android.permission.WRITE_CONTACTS" />
   <uses-permission android:name="android.permission.READ_SYNC_STATS" />
   <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
   <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-  fa
 
   <uses-sdk
-      android:targetSdkVersion="24" />
+      android:targetSdkVersion="29" />
 
   <application
       android:allowBackup="true"
@@ -105,62 +104,48 @@
           someone who explicitly knows the class name
       -->
     </activity>
-    <activity
-        android:name=".activities.InviteContactActivity"
-        android:theme="@android:style/Theme.Dialog">
+    <!--    <activity-->
+<!--        android:name=".activities.ViewGroupActivity"-->
+<!--        android:theme="@android:style/Theme.Dialog">-->
 
-      <!--
-          We use the INVITE intent to add a raw contact to an existing contact.
-          It always comes with a lookup URI.
-      -->
-      <intent-filter>
-        <action android:name="com.android.contacts.action.INVITE_CONTACT" />
+<!--      &lt;!&ndash;-->
+<!--          We use the VIEW intent to view a group in our app.-->
+<!--          It always comes with a lookup URI.-->
+<!--      &ndash;&gt;-->
+<!--      <intent-filter>-->
+<!--        <action android:name="android.intent.action.VIEW" />-->
 
-        <data android:mimeType="vnd.android.cursor.item/contact" />
-      </intent-filter>
-    </activity>
-    <activity
-        android:name=".activities.ViewGroupActivity"
-        android:theme="@android:style/Theme.Dialog">
+<!--        <data android:mimeType="vnd.android.cursor.item/group" />-->
+<!--      </intent-filter>-->
+<!--    </activity>-->
+<!--    <activity-->
+<!--        android:name=".activities.ViewStreamItemActivity"-->
+<!--        android:theme="@android:style/Theme.Dialog">-->
 
-      <!--
-          We use the VIEW intent to view a group in our app.
-          It always comes with a lookup URI.
-      -->
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
+<!--      &lt;!&ndash;-->
+<!--          We use the VIEW intent to view a stream item in our app.-->
+<!--          It always comes with a lookup URI.-->
+<!--      &ndash;&gt;-->
+<!--      <intent-filter>-->
+<!--        <action android:name="android.intent.action.VIEW" />-->
 
-        <data android:mimeType="vnd.android.cursor.item/group" />
-      </intent-filter>
-    </activity>
-    <activity
-        android:name=".activities.ViewStreamItemActivity"
-        android:theme="@android:style/Theme.Dialog">
+<!--        <data android:mimeType="vnd.android.cursor.item/stream_item" />-->
+<!--      </intent-filter>-->
+<!--    </activity>-->
+<!--    <activity-->
+<!--        android:name=".activities.ViewStreamItemPhotoActivity"-->
+<!--        android:theme="@android:style/Theme.Dialog">-->
 
-      <!--
-          We use the VIEW intent to view a stream item in our app.
-          It always comes with a lookup URI.
-      -->
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
+<!--      &lt;!&ndash;-->
+<!--          We use the VIEW intent to view a stream item photo in our app.-->
+<!--          It always comes with a lookup URI.-->
+<!--      &ndash;&gt;-->
+<!--      <intent-filter>-->
+<!--        <action android:name="android.intent.action.VIEW" />-->
 
-        <data android:mimeType="vnd.android.cursor.item/stream_item" />
-      </intent-filter>
-    </activity>
-    <activity
-        android:name=".activities.ViewStreamItemPhotoActivity"
-        android:theme="@android:style/Theme.Dialog">
-
-      <!--
-          We use the VIEW intent to view a stream item photo in our app.
-          It always comes with a lookup URI.
-      -->
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-
-        <data android:mimeType="vnd.android.cursor.item/stream_item_photo" />
-      </intent-filter>
-    </activity>
+<!--        <data android:mimeType="vnd.android.cursor.item/stream_item_photo" />-->
+<!--      </intent-filter>-->
+<!--    </activity>-->
   </application>
 
 </manifest>
