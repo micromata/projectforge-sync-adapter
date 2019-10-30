@@ -145,7 +145,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
   static {
     DANGER.add(READ_CONTACTS);
     DANGER.add(WRITE_CONTACTS);
-    //DANGER.add(WRITE_SETTINGS);
   }
 
   private static final int MY_PERMISSIONS_REQUEST = 13;
@@ -159,12 +158,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
         // If request is cancelled, the result arrays are empty.
         for (int gr : grantResults) {
           if (gr != PERMISSION_GRANTED) {
-            System.err.println("NOOOOT GRANTTTT" + gr);
             say(this, R.string.permission_rationale, Toast.LENGTH_LONG);
             finish();
             return;
-          } else {
-            System.err.println("GRANAAAAAAAAAAAAAAaTTTT" + gr);
           }
         }
         onCreateExec();
@@ -175,7 +171,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
   private void onCreateExec()
   {
-    System.err.println("ONCRSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSs");
     mAccountManager = AccountManager.get(this);
     Log.i(TAG, "loading data from Intent");
     final Intent intent = getIntent();
@@ -278,7 +273,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity
 
     checkAndRequestPermission();
 
-    //say(getMessage());
   }
 
   /*
